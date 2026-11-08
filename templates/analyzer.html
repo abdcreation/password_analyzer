@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Password Strength Analyzer - CyberGuard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h3 fw-bold text-light mb-1">
+        <i class="bi bi-cpu text-info me-2"></i>Comprehensive Password Strength Analyzer
+      </h2>
+      <p class="text-muted small mb-0">
+        Entropy calculations, algorithmic pattern detection, dictionary blacklist scans, and brute-force crack time estimates.
+      </p>
+    </div>
+    <div>
+      <span class="entropy-badge">
+        <i class="bi bi-shield-check"></i> Real-Time Cryptographic Engine
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Primary Analyzer & Results -->
+    <div class="col-lg-7">
+      
+      <!-- Input Card -->
+      <div class="cyber-card mb-4">
+        <div class="cyber-card-header">
+          <span class="fw-semibold text-light">Credential Input & Evaluation</span>
+          <span id="strengthScoreBadge" class="badge bg-secondary fs-6">0/100</span>
+        </div>
+        <div class="cyber-card-body">
+          <div class="mb-3">
+            <label class="form-label">Enter Password to Analyze:</label>
+            <div class="input-group">
+              <input type="password" id="passwordInput" class="form-control cyber-form-control fs-5" placeholder="Type a password or generate one below..." autocomplete="off">
+              <button class="btn input-group-text-cyber toggle-password" type="button" data-target="passwordInput" title="Toggle visibility">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+            
+            <!-- Dynamic Progress Meter -->
+            <div class="strength-meter-container mt-3" style="height: 10px;">
+              <div id="strengthMeterBar" class="strength-meter-fill meter-danger" style="width: 5%;"></div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="small text-muted">Evaluation: <strong id="strengthScoreText" class="text-light">Enter password</strong></span>
+              <span class="small text-muted">Shannon Distribution: <strong id="shannonEntropy" class="text-info">0.0 bits/char</strong></span>
+            </div>
+          </div>
+
+          <!-- Dictionary / Leetspeak alert -->
+          <div id="dictionaryAlert" style="display: none;"></div>
+
+          <!-- Entropy & Pool Statistics Grid -->
+          <div class="row g-2 mb-3">
+            <div class="col-sm-4">
+              <div class="p-2 rounded text-center" style="background: rgba(13, 21, 37, 0.7); border: 1px solid var(--border-color);">
+                <div class="small text-muted">Effective Entropy</div>
+                <div id="effectiveEntropy" class="fw-bold text-info fs-5">0 bits</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-2 rounded text-center" style="background: rgba(13, 21, 37, 0.7); border: 1px solid var(--border-color);">
+                <div class="small text-muted">Theoretical Space</div>
+                <div id="theorEntropy" class="fw-bold text-light fs-5">0 bits</div>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="p-2 rounded text-center" style="background: rgba(13, 21, 37, 0.7); border: 1px solid var(--border-color);">
+                <div class="small text-muted">Character Pool</div>
+                <div id="poolSize" class="fw-bold text-light fs-5">0 chars</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Policy Checklist -->
+          <h6 class="form-label mt-3 mb-2">Complexity & Hygiene Checklist</h6>
+          <div class="row g-2 p-3 rounded" style="background: #0d1525; border: 1px solid var(--border-color);">
+            <div class="col-sm-6">
+              <div id="checkLength8" class="checklist-item invalid"><i class="bi bi-circle"></i> Minimum 8 Characters</div>
+              <div id="checkLength12" class="checklist-item invalid"><i class="bi bi-circle"></i> Recommended 12+ Characters</div>
+              <div id="checkLower" class="checklist-item invalid"><i class="bi bi-circle"></i> Lowercase Letters (a-z)</div>
+              <div id="checkUpper" class="checklist-item invalid"><i class="bi bi-circle"></i> Uppercase Letters (A-Z)</div>
+            </div>
+            <div class="col-sm-6">
+              <div id="checkDigits" class="checklist-item invalid"><i class="bi bi-circle"></i> Numeric Digits (0-9)</div>
+              <div id="checkSymbols" class="checklist-item invalid"><i class="bi bi-circle"></i> Special Symbols (!@#$...)</div>
+              <div id="checkNoDict" class="checklist-item invalid"><i class="bi bi-circle"></i> No Dictionary / Leaked Words</div>
+              <div id="checkNoPatterns" class="checklist-item invalid"><i class="bi bi-circle"></i> No Predictable Sequences</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vulnerability & Pattern Detection Card -->
+      <div class="cyber-card mb-4">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-search text-warning"></i>
+            <span class="fw-semibold text-light">Algorithmic Pattern & Weakness Detection</span>
+          </div>
+        </div>
+        <div class="cyber-card-body">
+          <div id="detectedPatternsList">
+            <span class="text-muted small">Enter a password above to scan for patterns, repetitions, and keyboard sequences.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable Improvement Tips Card -->
+      <div class="cyber-card">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-lightbulb-fill text-info"></i>
+            <span class="fw-semibold text-light">Security Recommendations</span>
+          </div>
+        </div>
+        <div class="cyber-card-body">
+          <ul id="feedbackList" class="list-unstyled mb-0">
+            <li class="small text-muted">Recommendations will appear as you type.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Crack Time Matrix & Password Generator -->
+    <div class="col-lg-5">
+      
+      <!-- Crack Time Matrix -->
+      <div class="cyber-card mb-4">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-hourglass-split text-info"></i>
+            <span class="fw-semibold text-light">Estimated Time to Crack (Brute-Force)</span>
+          </div>
+        </div>
+        <div class="cyber-card-body">
+          <p class="text-muted small mb-3">
+            Estimated average time to explore 50% search space under various threat modeling scenarios:
+          </p>
+
+          <div class="row g-3">
+            <!-- Scenario 1: Fast GPU Hash -->
+            <div class="col-12">
+              <div id="crackFastGpu" class="crack-time-card danger text-start p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="small fw-bold text-light">Offline GPU Cluster (Fast Hash)</span>
+                  <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.7rem;">100B guesses/sec</span>
+                </div>
+                <div class="time-value">Instant</div>
+                <div class="small text-dim mt-1">MD5, SHA-1, NTLM, fast SHA-256</div>
+              </div>
+            </div>
+
+            <!-- Scenario 2: Bcrypt Slow Hash -->
+            <div class="col-12">
+              <div id="crackBcrypt" class="crack-time-card danger text-start p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="small fw-bold text-light">Offline Multi-GPU (Slow Bcrypt Cost 12)</span>
+                  <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.7rem;">10,000 guesses/sec</span>
+                </div>
+                <div class="time-value">Instant</div>
+                <div class="small text-dim mt-1">Our application's internal hashing standard</div>
+              </div>
+            </div>
+
+            <!-- Scenario 3: Online Unthrottled -->
+            <div class="col-12">
+              <div id="crackUnthrottled" class="crack-time-card danger text-start p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="small fw-bold text-light">Online Attack (No Rate Limiting)</span>
+                  <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.7rem;">1,000 attempts/sec</span>
+                </div>
+                <div class="time-value">Instant</div>
+                <div class="small text-dim mt-1">Typical unhardened web endpoints</div>
+              </div>
+            </div>
+
+            <!-- Scenario 4: Online Throttled -->
+            <div class="col-12">
+              <div id="crackThrottled" class="crack-time-card danger text-start p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="small fw-bold text-light">Online Attack (Protected with Lockout)</span>
+                  <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.7rem;">100 attempts/hour</span>
+                </div>
+                <div class="time-value">Instant</div>
+                <div class="small text-dim mt-1">Protected by CyberGuard lockout engine</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cryptographically Secure Password Generator -->
+      <div class="cyber-card">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-dice-5 text-success"></i>
+            <span class="fw-semibold text-light">High-Entropy Password Generator</span>
+          </div>
+        </div>
+        <div class="cyber-card-body">
+          <p class="text-muted small mb-3">
+            Generate cryptographically secure random passwords using Python's <code>secrets</code> module.
+          </p>
+
+          <div class="mb-3">
+            <div class="input-group">
+              <input type="text" id="generatedPasswordOutput" class="form-control cyber-form-control font-monospace" placeholder="Click Generate below..." readonly>
+              <button id="copyGenBtn" class="btn btn-cyber-outline" type="button" title="Copy to clipboard">
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <button id="applyGenBtn" class="btn btn-cyber-primary" type="button" title="Apply to analyzer input">
+                <i class="bi bi-arrow-up-circle"></i> Test
+              </button>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Length: <span id="genLengthVal" class="text-info fw-bold">16</span> characters</label>
+            </div>
+            <input type="range" class="form-range" id="genLength" min="8" max="32" value="16">
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genUpper" checked>
+                <label class="form-check-label small text-muted" for="genUpper">Uppercase (A-Z)</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genDigits" checked>
+                <label class="form-check-label small text-muted" for="genDigits">Digits (0-9)</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genSymbols" checked>
+                <label class="form-check-label small text-muted" for="genSymbols">Symbols (!@#$...)</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="autoFillGenerator" checked>
+                <label class="form-check-label small text-muted" for="autoFillGenerator">Auto-analyze</label>
+              </div>
+            </div>
+          </div>
+
+          <button id="generatePasswordBtn" class="btn btn-cyber-success w-100 py-2">
+            <i class="bi bi-arrow-repeat me-1"></i> Generate Cryptographic Password
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

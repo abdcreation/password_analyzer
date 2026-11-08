@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Register - CyberGuard Secure Authentication{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div class="cyber-card">
+        <div class="cyber-card-header text-center d-block">
+          <div class="d-inline-flex p-3 rounded-circle mb-2" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+            <i class="bi bi-person-plus-fill text-success fs-3"></i>
+          </div>
+          <h4 class="text-light fw-bold mb-1">Create Secure Account</h4>
+          <p class="text-muted small mb-0">Enforcing Entropy Verification & Zero-Plaintext Storage</p>
+        </div>
+
+        <div class="cyber-card-body">
+          <form method="POST" action="{{ url_for('register') }}">
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-person"></i></span>
+                  <input type="text" class="form-control cyber-form-control" id="username" name="username" value="{{ username or '' }}" placeholder="e.g. cyber_user" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-envelope"></i></span>
+                  <input type="email" class="form-control cyber-form-control" id="email" name="email" value="{{ email or '' }}" placeholder="user@domain.com" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password with Real-Time Strength Meter -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="passwordInput" class="form-label mb-0">Master Password</label>
+                <span id="strengthScoreBadge" class="badge bg-secondary" style="font-size: 0.75rem;">0/100</span>
+              </div>
+              <div class="input-group mt-1">
+                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control cyber-form-control" id="passwordInput" name="password" placeholder="Choose a strong password..." required autocomplete="new-password">
+                <button class="btn input-group-text-cyber toggle-password" type="button" data-target="passwordInput" title="Toggle visibility">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+
+              <!-- Strength Progress Meter -->
+              <div class="strength-meter-container mt-2">
+                <div id="strengthMeterBar" class="strength-meter-fill meter-danger" style="width: 5%;"></div>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Strength: <strong id="strengthScoreText" class="text-light">Start typing</strong></span>
+                <span class="small text-muted">Effective Entropy: <strong id="effectiveEntropy" class="text-info">0 bits</strong></span>
+              </div>
+            </div>
+
+            <!-- Embedded Checklist -->
+            <div class="p-3 rounded mb-3" style="background: #0d1525; border: 1px solid var(--border-color);">
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <div id="checkLength8" class="checklist-item invalid"><i class="bi bi-circle"></i> 8+ Characters</div>
+                  <div id="checkLength12" class="checklist-item invalid"><i class="bi bi-circle"></i> 12+ Characters</div>
+                  <div id="checkLower" class="checklist-item invalid"><i class="bi bi-circle"></i> Lowercase Letters</div>
+                  <div id="checkUpper" class="checklist-item invalid"><i class="bi bi-circle"></i> Uppercase Letters</div>
+                </div>
+                <div class="col-sm-6">
+                  <div id="checkDigits" class="checklist-item invalid"><i class="bi bi-circle"></i> Numbers (0-9)</div>
+                  <div id="checkSymbols" class="checklist-item invalid"><i class="bi bi-circle"></i> Special Symbols</div>
+                  <div id="checkNoDict" class="checklist-item invalid"><i class="bi bi-circle"></i> No Dictionary Match</div>
+                  <div id="checkNoPatterns" class="checklist-item invalid"><i class="bi bi-circle"></i> No Predictable Sequences</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dictionary Alert -->
+            <div id="dictionaryAlert" style="display: none;"></div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4">
+              <label for="confirm_password" class="form-label">Confirm Master Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-shield-check"></i></span>
+                <input type="password" class="form-control cyber-form-control" id="confirm_password" name="confirm_password" placeholder="Re-enter password to confirm" required autocomplete="new-password">
+                <button class="btn input-group-text-cyber toggle-password" type="button" data-target="confirm_password" title="Toggle visibility">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-cyber-primary w-100 py-2 fs-6 mb-3">
+              <i class="bi bi-check2-circle me-1"></i> Register Account
+            </button>
+          </form>
+        </div>
+
+        <div class="cyber-card-header text-center border-top py-3">
+          <span class="small text-muted">Already registered? </span>
+          <a href="{{ url_for('login') }}" class="small text-info text-decoration-none fw-semibold">
+            Sign In to Account <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

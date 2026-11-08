@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}User Security Dashboard - CyberGuard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h3 fw-bold text-light mb-1">
+        <i class="bi bi-speedometer2 text-info me-2"></i>Account Security Dashboard
+      </h2>
+      <p class="text-muted small mb-0">
+        Active session for user <strong class="text-light">{{ user.username }}</strong> &bull; Member since {{ user.created_at }}
+      </p>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+      <a href="{{ url_for('change_password') }}" class="btn btn-cyber-outline btn-sm">
+        <i class="bi bi-key me-1"></i> Change Password
+      </a>
+      <a href="{{ url_for('standalone_analyzer') }}" class="btn btn-cyber-primary btn-sm">
+        <i class="bi bi-cpu me-1"></i> Launch Analyzer
+      </a>
+    </div>
+  </div>
+
+  <!-- Security Score Warning Banner if score is low -->
+  {% if user.password_score < 50 %}
+    <div class="alert alert-cyber alert-warning mb-4" role="alert">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+          <div>
+            <strong>Password Health Advisory:</strong> Your current password has a security score of {{ user.password_score }}/100. It may be susceptible to modern dictionary or GPU attacks.
+          </div>
+        </div>
+        <a href="{{ url_for('change_password') }}" class="btn btn-warning btn-sm text-dark fw-bold">
+          Upgrade Password Now
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Overview Stat Cards -->
+  <div class="row g-3 mb-4">
+    <!-- Stat 1: Password Score -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-shield-check stat-icon"></i>
+        <div class="stat-title">Password Security Score</div>
+        <div class="stat-value">
+          {{ user.password_score }}<span class="fs-6 text-muted">/100</span>
+        </div>
+        <div class="mt-2">
+          {% if user.password_score >= 85 %}
+            <span class="badge bg-success">Very Strong</span>
+          {% elif user.password_score >= 70 %}
+            <span class="badge bg-primary">Strong</span>
+          {% elif user.password_score >= 50 %}
+            <span class="badge bg-warning text-dark">Moderate</span>
+          {% else %}
+            <span class="badge bg-danger">Weak / Vulnerable</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 2: Password Entropy -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-binary stat-icon"></i>
+        <div class="stat-title">Calculated Entropy</div>
+        <div class="stat-value text-info">
+          {{ user.password_entropy or 0.0 }}<span class="fs-6 text-muted"> bits</span>
+        </div>
+        <div class="mt-2 text-muted small">
+          Shannon theoretical search space
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Account Protection Status -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-lock-fill stat-icon"></i>
+        <div class="stat-title">Protection Status</div>
+        <div class="stat-value text-success">
+          {% if user.is_locked %}
+            <span class="text-danger fs-3">Locked</span>
+          {% else %}
+            <span class="text-success fs-3">Protected</span>
+          {% endif %}
+        </div>
+        <div class="mt-2 text-muted small">
+          Failed attempts: <strong class="text-light">{{ user.failed_attempts }}</strong> / 5
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Last Active Session -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-geo-alt stat-icon"></i>
+        <div class="stat-title">Last Authentication</div>
+        <div class="stat-value text-light fs-4 text-truncate">
+          {{ user.last_login_ip or '127.0.0.1' }}
+        </div>
+        <div class="mt-2 text-muted small text-truncate">
+          {{ user.last_login_at or 'Recently active' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Personal Login Audit Logs -->
+    <div class="col-lg-7">
+      <div class="cyber-card">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-info"></i>
+            <span class="fw-semibold text-light">Recent Account Access History</span>
+          </div>
+          <span class="badge bg-dark border border-secondary text-muted">{{ history|length }} events</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table cyber-table align-middle">
+            <thead>
+              <tr>
+                <th>Timestamp (UTC)</th>
+                <th>IP Address</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if history %}
+                {% for row in history %}
+                  <tr>
+                    <td><span class="small font-monospace text-muted">{{ row.timestamp }}</span></td>
+                    <td><code class="text-info">{{ row.ip_address }}</code></td>
+                    <td>
+                      {% if row.status == 'SUCCESS' %}
+                        <span class="badge-status-success">SUCCESS</span>
+                      {% elif row.status == 'BLOCKED_LOCKED' %}
+                        <span class="badge-status-locked">LOCKED</span>
+                      {% else %}
+                        <span class="badge-status-failed">FAILED</span>
+                      {% endif %}
+                    </td>
+                    <td><span class="small text-muted">{{ row.failure_reason or 'Authorized Login' }}</span></td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-4">No recent authentication records found.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: In-App Password Generator -->
+    <div class="col-lg-5">
+      <div class="cyber-card">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-plus text-success"></i>
+            <span class="fw-semibold text-light">Quick Cryptographic Key Generator</span>
+          </div>
+        </div>
+        <div class="cyber-card-body">
+          <p class="text-muted small mb-3">
+            Generate strong credentials resistant to GPU rainbow-table attacks.
+          </p>
+
+          <div class="mb-3">
+            <div class="input-group">
+              <input type="text" id="generatedPasswordOutput" class="form-control cyber-form-control font-monospace" placeholder="Click Generate below..." readonly>
+              <button id="copyGenBtn" class="btn btn-cyber-outline" type="button" title="Copy">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Length: <span id="genLengthVal" class="text-info fw-bold">16</span></label>
+            </div>
+            <input type="range" class="form-range" id="genLength" min="8" max="32" value="16">
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genUpper" checked>
+                <label class="form-check-label small text-muted" for="genUpper">Uppercase (A-Z)</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genDigits" checked>
+                <label class="form-check-label small text-muted" for="genDigits">Digits (0-9)</label>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="genSymbols" checked>
+                <label class="form-check-label small text-muted" for="genSymbols">Symbols (!@#...)</label>
+              </div>
+            </div>
+          </div>
+
+          <button id="generatePasswordBtn" class="btn btn-cyber-success w-100 py-2 mb-2">
+            <i class="bi bi-arrow-repeat me-1"></i> Generate New Password
+          </button>
+          <a href="{{ url_for('change_password') }}" class="btn btn-cyber-outline w-100 py-2">
+            <i class="bi bi-key me-1"></i> Go to Change Password
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

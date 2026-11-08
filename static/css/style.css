@@ -1,0 +1,486 @@
+/* ==========================================================================
+   CyberGuard - Cybersecurity Dark Theme & Glassmorphism Stylesheet
+   ========================================================================== */
+
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #161f30;
+  --bg-card-hover: #1e293b;
+  --border-color: #243046;
+  --border-glow: rgba(56, 189, 248, 0.3);
+  
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+
+  --accent-cyan: #38bdf8;
+  --accent-blue: #3b82f6;
+  --accent-purple: #a855f7;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-orange: #f97316;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Background cyber glow effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.05), transparent 35%),
+              radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.05), transparent 35%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Navigation */
+.navbar-cyber {
+  background-color: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 1.5rem;
+}
+
+.navbar-brand-cyber {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-brand-cyber .shield-icon {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+.nav-link {
+  color: var(--text-muted) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: 6px;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--accent-cyan) !important;
+  background-color: rgba(56, 189, 248, 0.08);
+}
+
+/* Cards & Glassmorphism */
+.cyber-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cyber-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.cyber-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cyber-card-body {
+  padding: 1.5rem;
+}
+
+/* Forms */
+.cyber-form-control {
+  background-color: #0d1424;
+  border: 1px solid var(--border-color);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.cyber-form-control:focus {
+  background-color: #10192d;
+  border-color: var(--accent-cyan);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  outline: none;
+}
+
+.cyber-form-control::placeholder {
+  color: var(--text-dim);
+}
+
+.form-label {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.4rem;
+}
+
+/* Buttons */
+.btn-cyber-primary {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-cyber-primary:hover {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+}
+
+.btn-cyber-outline {
+  background: transparent;
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.65rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-cyber-outline:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #fff;
+  border-color: #fff;
+}
+
+.btn-cyber-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.btn-cyber-danger:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-cyber-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.btn-cyber-success:hover {
+  background: #10b981;
+  color: #fff;
+}
+
+/* Password Strength Meter */
+.strength-meter-container {
+  height: 8px;
+  background-color: #1f2937;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.meter-danger {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+}
+
+.meter-orange {
+  background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+.meter-warning {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+.meter-primary {
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
+.meter-success {
+  background: linear-gradient(90deg, #059669, #10b981);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+/* Checklist items */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  transition: color 0.2s ease;
+}
+
+.checklist-item.valid {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.checklist-item.invalid {
+  color: var(--text-dim);
+}
+
+.checklist-item i {
+  font-size: 1rem;
+}
+
+/* Threat Cards */
+.crack-time-card {
+  background: #0d1525;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.crack-time-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.crack-time-card .time-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  color: #fff;
+}
+
+.crack-time-card.danger .time-value {
+  color: var(--color-danger);
+}
+
+.crack-time-card.warning .time-value {
+  color: var(--color-warning);
+}
+
+.crack-time-card.success .time-value {
+  color: var(--color-success);
+}
+
+/* Entropy Gauge Badge */
+.entropy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: var(--accent-cyan);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Stat Counters */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card .stat-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 2.2rem;
+  opacity: 0.2;
+  color: var(--accent-cyan);
+}
+
+.stat-card .stat-title {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .stat-value {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-top: 0.25rem;
+}
+
+/* Security Table */
+.cyber-table {
+  color: var(--text-main);
+  margin-bottom: 0;
+}
+
+.cyber-table thead th {
+  background-color: #0c1322;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-color);
+  padding: 0.9rem 1rem;
+}
+
+.cyber-table tbody td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  background-color: transparent;
+  color: var(--text-main);
+}
+
+.cyber-table tbody tr:hover td {
+  background-color: rgba(56, 189, 248, 0.04);
+}
+
+/* Badges */
+.badge-status-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.badge-status-failed {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.badge-status-locked {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Feature grid items on homepage */
+.feature-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  height: 100%;
+  transition: all 0.25s ease;
+}
+
+.feature-box:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.feature-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  margin-bottom: 1.25rem;
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+/* Alerts */
+.alert-cyber {
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.alert-cyber.alert-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: var(--color-success);
+  color: #a7f3d0;
+}
+
+.alert-cyber.alert-danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-danger);
+  color: #fca5a5;
+}
+
+.alert-cyber.alert-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: var(--color-warning);
+  color: #fde68a;
+}
+
+.alert-cyber.alert-info {
+  background-color: rgba(56, 189, 248, 0.1);
+  border-color: var(--accent-cyan);
+  color: #bae6fd;
+}
+
+/* Footer */
+.footer-cyber {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  background-color: #0c121e;
+  padding: 1.5rem 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+/* Password Toggle Icon */
+.input-group-text-cyber {
+  background-color: #0d1424;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.input-group-text-cyber:hover {
+  color: var(--accent-cyan);
+}

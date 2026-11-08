@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Security Operations Center (SOC) - CyberGuard Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h3 fw-bold text-light mb-1">
+        <i class="bi bi-shield-shaded text-warning me-2"></i>Security Operations Center (SOC)
+      </h2>
+      <p class="text-muted small mb-0">
+        Live authentication telemetry, brute-force attack monitoring, user security scores, and account lockout management.
+      </p>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+      <a href="{{ url_for('export_audit_logs') }}" class="btn btn-cyber-outline btn-sm">
+        <i class="bi bi-download me-1"></i> Export Audit Logs (CSV)
+      </a>
+      <span class="badge bg-danger d-flex align-items-center px-3 py-2">
+        <i class="bi bi-broadcast me-1"></i> SOC MONITOR ACTIVE
+      </span>
+    </div>
+  </div>
+
+  <!-- Key Metrics Counter Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-people-fill stat-icon"></i>
+        <div class="stat-title">Monitored Accounts</div>
+        <div class="stat-value">{{ metrics.total_users }}</div>
+        <div class="text-muted small mt-1">Active registered identities</div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-lock-fill stat-icon text-danger"></i>
+        <div class="stat-title">Locked Accounts</div>
+        <div class="stat-value text-danger">{{ metrics.locked_users }}</div>
+        <div class="text-muted small mt-1">Brute-force lockout active</div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-activity stat-icon"></i>
+        <div class="stat-title">Total Logins Monitored</div>
+        <div class="stat-value text-info">{{ metrics.total_attempts }}</div>
+        <div class="text-muted small mt-1">
+          <span class="text-success">{{ metrics.success_count }} OK</span> &bull; 
+          <span class="text-danger">{{ metrics.failed_count }} Failed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <i class="bi bi-exclamation-triangle-fill stat-icon text-warning"></i>
+        <div class="stat-title">Brute-Force Incidents</div>
+        <div class="stat-value text-warning">{{ metrics.brute_force_alerts }}</div>
+        <div class="text-muted small mt-1">High-frequency triggers logged</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Analytics Row (Chart.js) -->
+  <div class="row g-4 mb-4">
+    <!-- Chart 1: Activity Timeline -->
+    <div class="col-lg-6">
+      <div class="cyber-card h-100">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-graph-up text-info"></i>
+            <span class="fw-semibold text-light">Authentication Volume Over Time</span>
+          </div>
+          <span class="small text-muted">Last 7 Days</span>
+        </div>
+        <div class="cyber-card-body" style="height: 280px; position: relative;">
+          <canvas id="activityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Status Breakdown -->
+    <div class="col-lg-3">
+      <div class="cyber-card h-100">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-pie-chart text-warning"></i>
+            <span class="fw-semibold text-light">Attempt Status</span>
+          </div>
+        </div>
+        <div class="cyber-card-body d-flex align-items-center justify-content-center" style="height: 280px; position: relative;">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 3: Password Strength Distribution -->
+    <div class="col-lg-3">
+      <div class="cyber-card h-100">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-bar-chart-fill text-success"></i>
+            <span class="fw-semibold text-light">Strength Tiers</span>
+          </div>
+        </div>
+        <div class="cyber-card-body" style="height: 280px; position: relative;">
+          <canvas id="strengthChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Security Alerts & Suspicious Activity Feed -->
+  <div class="cyber-card mb-4">
+    <div class="cyber-card-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-bell-fill text-danger"></i>
+        <span class="fw-semibold text-light">Live Suspicious Activity & Security Incident Feed</span>
+      </div>
+      <span class="badge bg-dark border border-danger text-danger">{{ alerts|length }} logged</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table cyber-table align-middle">
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Alert Type</th>
+            <th>Description</th>
+            <th>Attacker / Target</th>
+            <th>Timestamp (UTC)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if alerts %}
+            {% for alert in alerts %}
+              <tr>
+                <td>
+                  {% if alert.severity == 'CRITICAL' %}
+                    <span class="badge bg-danger text-uppercase">CRITICAL</span>
+                  {% elif alert.severity == 'HIGH' %}
+                    <span class="badge bg-warning text-dark text-uppercase">HIGH</span>
+                  {% elif alert.severity == 'MEDIUM' %}
+                    <span class="badge bg-info text-dark text-uppercase">MEDIUM</span>
+                  {% else %}
+                    <span class="badge bg-secondary text-uppercase">LOW</span>
+                  {% endif %}
+                </td>
+                <td><strong class="text-light">{{ alert.alert_type }}</strong></td>
+                <td><span class="small text-muted">{{ alert.description }}</span></td>
+                <td>
+                  {% if alert.ip_address %}
+                    <code class="text-warning">{{ alert.ip_address }}</code>
+                  {% endif %}
+                  {% if alert.username %}
+                    <span class="text-light small">({{ alert.username }})</span>
+                  {% endif %}
+                </td>
+                <td><span class="small text-muted font-monospace">{{ alert.timestamp }}</span></td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">No security incidents detected. System healthy.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- User Accounts & Lockout Management -->
+  <div class="cyber-card mb-4">
+    <div class="cyber-card-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-person-gear text-info"></i>
+        <span class="fw-semibold text-light">User Credentials & Lockout Administration</span>
+      </div>
+      <span class="badge bg-dark border border-secondary text-muted">{{ users|length }} accounts</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table cyber-table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Password Security</th>
+            <th>Lockout Status</th>
+            <th>Failed Attempts</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td><span class="small text-muted font-monospace">#{{ u.id }}</span></td>
+              <td><strong class="text-light">{{ u.username }}</strong></td>
+              <td><span class="small text-muted">{{ u.email }}</span></td>
+              <td>
+                {% if u.role == 'admin' %}
+                  <span class="badge bg-danger">ADMIN</span>
+                {% else %}
+                  <span class="badge bg-secondary">USER</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height: 6px; width: 60px; background: #1f2937;">
+                    <div class="progress-bar {% if u.password_score >= 70 %}bg-success{% elif u.password_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                         style="width: {{ u.password_score }}%;"></div>
+                  </div>
+                  <span class="small fw-bold text-light">{{ u.password_score }}/100</span>
+                </div>
+              </td>
+              <td>
+                {% if u.is_locked %}
+                  <span class="badge-status-locked"><i class="bi bi-lock-fill me-1"></i>LOCKED</span>
+                {% else %}
+                  <span class="badge-status-success"><i class="bi bi-unlock-fill me-1"></i>NORMAL</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="small {% if u.failed_attempts >= 5 %}text-danger fw-bold{% elif u.failed_attempts > 0 %}text-warning{% else %}text-muted{% endif %}">
+                  {{ u.failed_attempts }} / 5
+                </span>
+              </td>
+              <td>
+                {% if u.id != session.get('user_id') %}
+                  <form method="POST" action="{{ url_for('toggle_user_lock', user_id=u.id) }}" class="d-inline">
+                    {% if u.is_locked %}
+                      <button type="submit" class="btn btn-sm btn-cyber-success py-1 px-2" title="Unlock Account">
+                        <i class="bi bi-unlock me-1"></i> Unlock
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-sm btn-cyber-danger py-1 px-2" title="Manually Lock Account">
+                        <i class="bi bi-lock me-1"></i> Lock
+                      </button>
+                    {% endif %}
+                  </form>
+                {% else %}
+                  <span class="badge bg-dark border border-secondary text-muted">Current Admin</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- System Audit Logs with Live Search & Filtering -->
+  <div class="cyber-card">
+    <div class="cyber-card-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-journal-text text-info"></i>
+        <span class="fw-semibold text-light">Authentication Audit Logs</span>
+      </div>
+      
+      <!-- Filter Inputs -->
+      <div class="d-flex gap-2">
+        <input type="text" id="logSearchInput" class="form-control form-control-sm cyber-form-control" placeholder="Search user, IP, or reason..." style="width: 220px;">
+        <select id="logStatusFilter" class="form-select form-select-sm cyber-form-control" style="width: 140px;">
+          <option value="">All Statuses</option>
+          <option value="SUCCESS">SUCCESS</option>
+          <option value="FAILED">FAILED</option>
+          <option value="BLOCKED_LOCKED">LOCKED</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table cyber-table align-middle">
+        <thead>
+          <tr>
+            <th>Timestamp (UTC)</th>
+            <th>Target Account</th>
+            <th>Source IP</th>
+            <th>Event Status</th>
+            <th>Failure Reason / Detail</th>
+            <th>User Agent</th>
+          </tr>
+        </thead>
+        <tbody id="auditLogsTableBody">
+          {% for log in logs %}
+            <tr>
+              <td><span class="small text-muted font-monospace">{{ log.timestamp }}</span></td>
+              <td><strong class="text-light">{{ log.username }}</strong></td>
+              <td><code class="text-info">{{ log.ip_address }}</code></td>
+              <td>
+                {% if log.status == 'SUCCESS' %}
+                  <span class="badge-status-success">SUCCESS</span>
+                {% elif log.status == 'BLOCKED_LOCKED' %}
+                  <span class="badge-status-locked">BLOCKED</span>
+                {% else %}
+                  <span class="badge-status-failed">FAILED</span>
+                {% endif %}
+              </td>
+              <td><span class="small text-muted">{{ log.failure_reason or '—' }}</span></td>
+              <td><span class="small text-dim text-truncate d-inline-block" style="max-width: 220px;" title="{{ log.user_agent }}">{{ log.user_agent }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

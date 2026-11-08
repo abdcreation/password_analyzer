@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - CyberGuard Secure Authentication{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      
+      <div class="cyber-card">
+        <div class="cyber-card-header text-center d-block">
+          <div class="d-inline-flex p-3 rounded-circle mb-2" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+            <i class="bi bi-shield-lock-fill text-info fs-3"></i>
+          </div>
+          <h4 class="text-light fw-bold mb-1">Secure Sign In</h4>
+          <p class="text-muted small mb-0">Protected by Bcrypt Salting & Brute-Force Lockout Defense</p>
+        </div>
+
+        <div class="cyber-card-body">
+          <form method="POST" action="{{ url_for('login', next=request.args.get('next')) }}">
+            
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control cyber-form-control" id="username" name="username" value="{{ username or '' }}" placeholder="Enter username" required autofocus>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="password" class="form-label mb-0">Password</label>
+              </div>
+              <div class="input-group mt-1">
+                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-key"></i></span>
+                <input type="password" class="form-control cyber-form-control" id="password" name="password" placeholder="Enter password" required>
+                <button class="btn input-group-text-cyber toggle-password" type="button" data-target="password" title="Toggle visibility">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-cyber-primary w-100 py-2 fs-6 mb-3">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Authenticate & Enter
+            </button>
+          </form>
+
+          <!-- Security Policy Notice -->
+          <div class="p-2 rounded mb-3 small" style="background: rgba(13, 21, 37, 0.7); border: 1px solid var(--border-color);">
+            <div class="d-flex align-items-center gap-2 text-warning mb-1">
+              <i class="bi bi-exclamation-octagon-fill"></i>
+              <strong>Brute-Force Protection Active</strong>
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem;">
+              Accounts are automatically locked for 15 minutes after 5 consecutive failed authentication attempts.
+            </div>
+          </div>
+
+          <!-- Quick Autofill Demo Credentials for Easy Testing -->
+          <div class="text-center pt-2 border-top border-secondary">
+            <span class="small text-muted d-block mb-2">Test with demo accounts:</span>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-dark border border-secondary text-info demo-btn" 
+                      onclick="fillDemo('admin', 'AdminSecOps#2026!🛡️')">
+                <i class="bi bi-shield-shaded me-1"></i> Admin Demo
+              </button>
+              <button type="button" class="btn btn-sm btn-dark border border-secondary text-light demo-btn" 
+                      onclick="fillDemo('alice_sec', 'Al!ceCyber#9921$Pro')">
+                <i class="bi bi-person me-1"></i> User Demo
+              </button>
+              <button type="button" class="btn btn-sm btn-dark border border-danger text-danger demo-btn" 
+                      onclick="fillDemo('bob_weak', 'wrongpassword')">
+                <i class="bi bi-lock me-1"></i> Test Lockout
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="cyber-card-header text-center border-top py-3">
+          <span class="small text-muted">Don't have an account? </span>
+          <a href="{{ url_for('register') }}" class="small text-info text-decoration-none fw-semibold">
+            Create an Account <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function fillDemo(username, password) {
+    document.getElementById('username').value = username;
+    document.getElementById('password').value = password;
+  }
+</script>
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

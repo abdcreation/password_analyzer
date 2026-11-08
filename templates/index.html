@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}CyberGuard - Advanced Password Strength Analyzer & Secure Authentication{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+  <!-- Hero Section -->
+  <div class="row align-items-center mb-5">
+    <div class="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3);">
+        <i class="bi bi-shield-check text-info"></i>
+        <span class="small fw-semibold text-info text-uppercase">Enterprise Cybersecurity Suite</span>
+      </div>
+      <h1 class="display-5 fw-bold text-light mb-3">
+        Next-Generation <span style="background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Password Analyzer</span> & Secure Auth
+      </h1>
+      <p class="lead text-muted mb-4" style="max-width: 650px;">
+        Evaluate credential vulnerability with Shannon entropy, algorithmic sequence and keyboard-walk detection, and leetspeak dictionary checks. Defend user accounts against brute-force attacks with bcrypt salting, real-time login monitoring, and progressive account lockouts.
+      </p>
+      <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+        <a href="{{ url_for('standalone_analyzer') }}" class="btn btn-cyber-primary px-4 py-2">
+          <i class="bi bi-cpu me-2"></i> Launch Full Analyzer
+        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-cyber-outline px-4 py-2">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Access Dashboard
+        </a>
+      </div>
+
+      <!-- Quick Demo Credentials Callout -->
+      <div class="mt-4 p-3 rounded" style="background: rgba(17, 24, 39, 0.6); border: 1px dashed var(--border-color); max-width: 600px;">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="bi bi-key-fill text-warning"></i>
+          <span class="small fw-bold text-light text-uppercase">Pre-Configured Demo Accounts:</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <span class="badge bg-dark border border-secondary text-light p-2">
+            <strong>Admin:</strong> <code>admin</code> / <code>AdminSecOps#2026!🛡️</code>
+          </span>
+          <span class="badge bg-dark border border-secondary text-light p-2">
+            <strong>User:</strong> <code>alice_sec</code> / <code>Al!ceCyber#9921$Pro</code>
+          </span>
+          <span class="badge bg-dark border border-danger text-danger p-2">
+            <strong>Locked Demo:</strong> <code>bob_weak</code>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Quick Analyzer Widget -->
+    <div class="col-lg-5">
+      <div class="cyber-card">
+        <div class="cyber-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill text-info"></i>
+            <h5 class="mb-0 text-light fs-6">Live Password Strength Evaluator</h5>
+          </div>
+          <span id="strengthScoreBadge" class="badge bg-secondary">0/100</span>
+        </div>
+        <div class="cyber-card-body">
+          <div class="mb-3">
+            <label class="form-label">Type any password to test:</label>
+            <div class="input-group">
+              <input type="password" id="passwordInput" class="form-control cyber-form-control" placeholder="e.g. Tr0ub4dor&3 or P@ssw0rd123" autocomplete="off">
+              <button class="btn input-group-text-cyber toggle-password" type="button" data-target="passwordInput" title="Toggle visibility">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+            
+            <!-- Dynamic Strength Meter -->
+            <div class="strength-meter-container mt-2">
+              <div id="strengthMeterBar" class="strength-meter-fill meter-danger" style="width: 5%;"></div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="small text-muted">Rating: <strong id="strengthScoreText" class="text-light">Enter password</strong></span>
+              <span class="small text-muted">Effective Entropy: <strong id="effectiveEntropy" class="text-info">0 bits</strong></span>
+            </div>
+          </div>
+
+          <!-- Dictionary Alert Box -->
+          <div id="dictionaryAlert" style="display: none;"></div>
+
+          <!-- Dynamic Checklist -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div id="checkLength8" class="checklist-item invalid"><i class="bi bi-circle"></i> 8+ Characters</div>
+              <div id="checkLength12" class="checklist-item invalid"><i class="bi bi-circle"></i> 12+ Characters</div>
+              <div id="checkLower" class="checklist-item invalid"><i class="bi bi-circle"></i> Lowercase Letters</div>
+              <div id="checkUpper" class="checklist-item invalid"><i class="bi bi-circle"></i> Uppercase Letters</div>
+            </div>
+            <div class="col-6">
+              <div id="checkDigits" class="checklist-item invalid"><i class="bi bi-circle"></i> Numbers (0-9)</div>
+              <div id="checkSymbols" class="checklist-item invalid"><i class="bi bi-circle"></i> Special Characters</div>
+              <div id="checkNoDict" class="checklist-item invalid"><i class="bi bi-circle"></i> No Dictionary Match</div>
+              <div id="checkNoPatterns" class="checklist-item invalid"><i class="bi bi-circle"></i> No Sequential Patterns</div>
+            </div>
+          </div>
+
+          <!-- Crack Time Summary -->
+          <div class="p-2 rounded mb-3" style="background: rgba(13, 21, 37, 0.7); border: 1px solid var(--border-color);">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small text-muted">Offline Fast GPU Rig:</span>
+              <span id="crackFastGpu" class="small fw-bold text-light"><span class="time-value">Instant</span></span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="small text-muted">Slow Hash (Bcrypt Cost 12):</span>
+              <span id="crackBcrypt" class="small fw-bold text-light"><span class="time-value">Instant</span></span>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <a href="{{ url_for('standalone_analyzer') }}" class="small text-info text-decoration-none">
+              View comprehensive mathematical breakdown <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Architecture Feature Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-12 text-center mb-2">
+      <h2 class="h3 fw-bold text-light">Built-in Cybersecurity Defenses</h2>
+      <p class="text-muted">Rigorous defensive mechanisms safeguarding accounts and user identity</p>
+    </div>
+
+    <!-- Feature 1 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-calculator"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">Entropy Calculation</h5>
+        <p class="text-muted small mb-0">
+          Computes both theoretical pool size entropy (\(L \log_2 N\)) and Shannon character distribution entropy. Penalizes repetitive symbols to calculate true effective entropy bits.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-keyboard"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">Pattern & Keyboard Walks</h5>
+        <p class="text-muted small mb-0">
+          Identifies alphabetical runs (<code>abc</code>, <code>xyz</code>), numerical progressions (<code>1234</code>, <code>9876</code>), QWERTY keyboard sequences, dates, and repeated character runs.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-journal-x"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">Dictionary & Leetspeak Scan</h5>
+        <p class="text-muted small mb-0">
+          Cross-references passwords against top leaked passwords and dictionary stems. De-obfuscates leetspeak substitutions (e.g. <code>P@$$w0rd</code> &rarr; <code>password</code>) to expose evasion attempts.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">Bcrypt Hashing & Salting</h5>
+        <p class="text-muted small mb-0">
+          Employs adaptive bcrypt with 12 computational cost rounds and per-user cryptographic salts, ensuring resistance against high-speed GPU and rainbow-table cracking attacks.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature 5 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-stopwatch"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">Brute-Force & Lockout</h5>
+        <p class="text-muted small mb-0">
+          Monitors authentication attempts per username and IP. Temporarily locks accounts upon reaching 5 consecutive failures, with remaining attempt countdowns and automatic unlock expiration.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature 6 -->
+    <div class="col-md-6 col-lg-4">
+      <div class="feature-box">
+        <div class="feature-icon-wrapper">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h5 class="text-light fw-bold mb-2">SOC Security Operations</h5>
+        <p class="text-muted small mb-0">
+          Interactive administrator console with real-time Chart.js telemetry, suspicious login attempt alerts, one-click manual account lock/unlock, and CSV compliance audit log exports.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}
